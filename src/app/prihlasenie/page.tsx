@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession, prihlas } from "@/lib/auth";
+import { jeSystemPrazdny } from "@/lib/prvyStart";
 import { Vstup, Tlacidlo, Chyba, Pole } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,9 @@ export default async function Prihlasenie({
 }) {
   const session = await getSession();
   if (session) redirect("/");
+
+  // Čerstvo nasadený systém ešte nemá účty – pošleme ho rovno na založenie.
+  if (await jeSystemPrazdny()) redirect("/uvod");
 
   const { chyba } = await searchParams;
 

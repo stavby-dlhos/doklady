@@ -78,17 +78,16 @@ Zvyšok je v `.env.example` aj s vysvetlivkami.
 
 ### 4. Prvé spustenie
 
-Migrácie bežia automaticky pri každom nasadení (`railway.json`). Po prvom nasadení
-spusti raz naplnenie počiatočnými dátami — v Railway cez **Settings → Deploy → Run
-command**, alebo lokálne s produkčnou `DATABASE_URL`:
+Migrácie bežia automaticky pri každom nasadení (`railway.json`). Nič v termináli
+spúšťať netreba — otvor adresu aplikácie a ukáže sa úvodná obrazovka, kde si
+založíš svoj účet a základné údaje firmy.
 
-```bash
-npm run db:seed
-```
+Len čo prvý účet existuje, úvodná obrazovka sa **navždy zamkne** a každý ďalší
+návštevník ide rovno na prihlásenie. Účet pre účtovníčku pridáš v Nastaveniach.
 
-Vypíše prihlasovacie heslá. **Hneď si ich ulož a po prvom prihlásení ich zmeň
-v Nastaveniach.** Vlastné heslá vieš zadať vopred cez `SEED_MAJITEL_HESLO`
-a `SEED_UCTOVNIK_HESLO`.
+Ak by si predsa len chcel systém naplniť z príkazového riadka (napríklad pri
+obnove), slúži na to `npm run db:seed` — heslá vieš zadať cez premenné
+`SEED_MAJITEL_HESLO` a `SEED_UCTOVNIK_HESLO`.
 
 ### 5. Úložisko skenov
 
@@ -194,6 +193,7 @@ npm run dev               # http://localhost:3000
 ```bash
 npm run test:vypocty      # DPH, zaokrúhľovanie, parsovanie výpisov
 npm run test:e2e          # celý tok v prehliadači (appka musí bežať)
+npm run test:prvystart    # úvodná obrazovka na prázdnej databáze
 npm run typecheck
 npm run uloha             # ručné spustenie údržby
 npm run backup            # ručná záloha

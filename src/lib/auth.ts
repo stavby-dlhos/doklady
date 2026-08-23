@@ -86,7 +86,11 @@ export async function getSession(): Promise<Session | null> {
 /** Použi v každej chránenej stránke a server akcii. */
 export async function vyzadujPrihlasenie(): Promise<Session> {
   const s = await getSession();
-  if (!s) redirect("/prihlasenie");
+  if (!s) {
+    // Hneď po nasadení nie je koho prihlásiť – pošleme ho založiť prvý účet.
+    const { jeSystemPrazdny } = await import("./prvyStart");
+    redirect((await jeSystemPrazdny()) ? "/uvod" : "/prihlasenie");
+  }
   return s;
 }
 

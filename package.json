@@ -16,7 +16,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test:vypocty": "tsx scripts/test-vypocty.ts",
-    "test:e2e": "tsx scripts/test-e2e.ts"
+    "test:e2e": "tsx scripts/test-e2e.ts",
+    "test:prvystart": "tsx scripts/test-prvystart.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
