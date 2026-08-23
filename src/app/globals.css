@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-antracit-50: #f6f7f8;
+  --color-antracit-100: #eceef0;
+  --color-antracit-200: #d6dade;
+  --color-antracit-300: #b2bac2;
+  --color-antracit-400: #8894a0;
+  --color-antracit-500: #6a7785;
+  --color-antracit-600: #55606c;
+  --color-antracit-700: #464f58;
+  --color-antracit-800: #3a3f47;
+  --color-antracit-900: #22252a;
+  --color-antracit-950: #16181c;
+
+  --color-zlata-50: #fbf8f1;
+  --color-zlata-100: #f5eeda;
+  --color-zlata-200: #eadab5;
+  --color-zlata-300: #d9c089;
+  --color-zlata-400: #c8a463;
+  --color-zlata-500: #b08d46;
+  --color-zlata-600: #96743a;
+  --color-zlata-700: #785a31;
+  --color-zlata-800: #63492e;
+  --color-zlata-900: #543e2a;
+
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@font-face {
+  font-family: "Work Sans";
+  src: url("/fonts/WorkSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Work Sans";
+  src: url("/fonts/WorkSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-antracit-50);
+  color: var(--color-antracit-900);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Skryje šípky pri number inputoch – v tabuľkách so sumami zavadzajú. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+@media print {
+  .neplatit-tlac {
+    display: none !important;
+  }
+}

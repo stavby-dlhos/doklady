@@ -1,0 +1,2355 @@
+{
+  "id": "350db23d-7917-4c66-89d3-fb162abb5639",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.audit_log": {
+      "name": "audit_log",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "entita": {
+          "name": "entita",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entita_id": {
+          "name": "entita_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "akcia": {
+          "name": "akcia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pouzivatel_id": {
+          "name": "pouzivatel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "detail": {
+          "name": "detail",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pred": {
+          "name": "pred",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "po": {
+          "name": "po",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "audit_entita_idx": {
+          "name": "audit_entita_idx",
+          "columns": [
+            {
+              "expression": "entita",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entita_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "audit_created_idx": {
+          "name": "audit_created_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bank_pohyby": {
+      "name": "bank_pohyby",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ucet_id": {
+          "name": "ucet_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "datum": {
+          "name": "datum",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "suma": {
+          "name": "suma",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mena": {
+          "name": "mena",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'EUR'"
+        },
+        "smer": {
+          "name": "smer",
+          "type": "smer",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "protiucet_iban": {
+          "name": "protiucet_iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "protiucet_nazov": {
+          "name": "protiucet_nazov",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "variabilny_symbol": {
+          "name": "variabilny_symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "konstantny_symbol": {
+          "name": "konstantny_symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "specificky_symbol": {
+          "name": "specificky_symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "popis": {
+          "name": "popis",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_ref": {
+          "name": "bank_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sparovane": {
+          "name": "sparovane",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "bank_pohyby_datum_idx": {
+          "name": "bank_pohyby_datum_idx",
+          "columns": [
+            {
+              "expression": "datum",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "bank_pohyby_sparovane_idx": {
+          "name": "bank_pohyby_sparovane_idx",
+          "columns": [
+            {
+              "expression": "sparovane",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "bank_pohyby_vs_idx": {
+          "name": "bank_pohyby_vs_idx",
+          "columns": [
+            {
+              "expression": "variabilny_symbol",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "bank_pohyby_ucet_id_bank_ucty_id_fk": {
+          "name": "bank_pohyby_ucet_id_bank_ucty_id_fk",
+          "tableFrom": "bank_pohyby",
+          "tableTo": "bank_ucty",
+          "columnsFrom": [
+            "ucet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bank_pohyby_bank_ref_unique": {
+          "name": "bank_pohyby_bank_ref_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "bank_ref"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bank_ucty": {
+      "name": "bank_ucty",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nazov": {
+          "name": "nazov",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iban": {
+          "name": "iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bic": {
+          "name": "bic",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mena": {
+          "name": "mena",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'EUR'"
+        },
+        "vychodzi": {
+          "name": "vychodzi",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bank_ucty_iban_unique": {
+          "name": "bank_ucty_iban_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "iban"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ciselne_rady": {
+      "name": "ciselne_rady",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kod": {
+          "name": "kod",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nazov": {
+          "name": "nazov",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prefix": {
+          "name": "prefix",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "rok": {
+          "name": "rok",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "posledne_cislo": {
+          "name": "posledne_cislo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "pocet_cislic": {
+          "name": "pocet_cislic",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 4
+        },
+        "typ": {
+          "name": "typ",
+          "type": "faktura_typ",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'BEZNA'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ciselne_rady_kod_unique": {
+          "name": "ciselne_rady_kod_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "kod"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.exporty": {
+      "name": "exporty",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "obdobie_od": {
+          "name": "obdobie_od",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "obdobie_do": {
+          "name": "obdobie_do",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "format": {
+          "name": "format",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pocet_dokladov": {
+          "name": "pocet_dokladov",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "pocet_faktur": {
+          "name": "pocet_faktur",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "subor_url": {
+          "name": "subor_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vytvoril_id": {
+          "name": "vytvoril_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.faktura_polozky": {
+      "name": "faktura_polozky",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "faktura_id": {
+          "name": "faktura_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "poradie": {
+          "name": "poradie",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "skupina": {
+          "name": "skupina",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nazov": {
+          "name": "nazov",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "popis": {
+          "name": "popis",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mnozstvo": {
+          "name": "mnozstvo",
+          "type": "numeric(12, 3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'1'"
+        },
+        "mj": {
+          "name": "mj",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ks'"
+        },
+        "cena_za_mj": {
+          "name": "cena_za_mj",
+          "type": "numeric(12, 4)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "zlava_pct": {
+          "name": "zlava_pct",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "sadzba_dph": {
+          "name": "sadzba_dph",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 23
+        },
+        "zaklad": {
+          "name": "zaklad",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "dph": {
+          "name": "dph",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "spolu": {
+          "name": "spolu",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        }
+      },
+      "indexes": {
+        "polozky_faktura_idx": {
+          "name": "polozky_faktura_idx",
+          "columns": [
+            {
+              "expression": "faktura_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "faktura_polozky_faktura_id_faktury_id_fk": {
+          "name": "faktura_polozky_faktura_id_faktury_id_fk",
+          "tableFrom": "faktura_polozky",
+          "tableTo": "faktury",
+          "columnsFrom": [
+            "faktura_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.faktury": {
+      "name": "faktury",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "cislo": {
+          "name": "cislo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rada_id": {
+          "name": "rada_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "typ": {
+          "name": "typ",
+          "type": "faktura_typ",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'BEZNA'"
+        },
+        "odberatel_id": {
+          "name": "odberatel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zakazka_id": {
+          "name": "zakazka_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datum_vystavenia": {
+          "name": "datum_vystavenia",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "datum_dodania": {
+          "name": "datum_dodania",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "datum_splatnosti": {
+          "name": "datum_splatnosti",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "variabilny_symbol": {
+          "name": "variabilny_symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "konstantny_symbol": {
+          "name": "konstantny_symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "specificky_symbol": {
+          "name": "specificky_symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "forma_uhrady": {
+          "name": "forma_uhrady",
+          "type": "forma_uhrady",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PREVOD'"
+        },
+        "prenos_dph": {
+          "name": "prenos_dph",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "zaklad_23": {
+          "name": "zaklad_23",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "zaklad_19": {
+          "name": "zaklad_19",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "zaklad_5": {
+          "name": "zaklad_5",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "zaklad_0": {
+          "name": "zaklad_0",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "dph_23": {
+          "name": "dph_23",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "dph_19": {
+          "name": "dph_19",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "dph_5": {
+          "name": "dph_5",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "dph_spolu": {
+          "name": "dph_spolu",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "suma_bez_dph": {
+          "name": "suma_bez_dph",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "suma_celkom": {
+          "name": "suma_celkom",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "uhradene": {
+          "name": "uhradene",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "mena": {
+          "name": "mena",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'EUR'"
+        },
+        "stav": {
+          "name": "stav",
+          "type": "faktura_stav",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'KONCEPT'"
+        },
+        "text_pred_polozkami": {
+          "name": "text_pred_polozkami",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "poznamka": {
+          "name": "poznamka",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pdf_url": {
+          "name": "pdf_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "qr_payload": {
+          "name": "qr_payload",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "odoslana_dna": {
+          "name": "odoslana_dna",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "odoslana_na": {
+          "name": "odoslana_na",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "uhradena_dna": {
+          "name": "uhradena_dna",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stornovana_dna": {
+          "name": "stornovana_dna",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vytvoril_id": {
+          "name": "vytvoril_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "faktury_stav_idx": {
+          "name": "faktury_stav_idx",
+          "columns": [
+            {
+              "expression": "stav",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "faktury_splatnost_idx": {
+          "name": "faktury_splatnost_idx",
+          "columns": [
+            {
+              "expression": "datum_splatnosti",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "faktury_odberatel_idx": {
+          "name": "faktury_odberatel_idx",
+          "columns": [
+            {
+              "expression": "odberatel_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "faktury_rada_id_ciselne_rady_id_fk": {
+          "name": "faktury_rada_id_ciselne_rady_id_fk",
+          "tableFrom": "faktury",
+          "tableTo": "ciselne_rady",
+          "columnsFrom": [
+            "rada_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "faktury_odberatel_id_partneri_id_fk": {
+          "name": "faktury_odberatel_id_partneri_id_fk",
+          "tableFrom": "faktury",
+          "tableTo": "partneri",
+          "columnsFrom": [
+            "odberatel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "faktury_zakazka_id_zakazky_id_fk": {
+          "name": "faktury_zakazka_id_zakazky_id_fk",
+          "tableFrom": "faktury",
+          "tableTo": "zakazky",
+          "columnsFrom": [
+            "zakazka_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "faktury_vytvoril_id_pouzivatelia_id_fk": {
+          "name": "faktury_vytvoril_id_pouzivatelia_id_fk",
+          "tableFrom": "faktury",
+          "tableTo": "pouzivatelia",
+          "columnsFrom": [
+            "vytvoril_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "faktury_cislo_unique": {
+          "name": "faktury_cislo_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "cislo"
+          ]
+        },
+        "faktury_variabilny_symbol_unique": {
+          "name": "faktury_variabilny_symbol_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "variabilny_symbol"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.firma": {
+      "name": "firma",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "'firma'"
+        },
+        "nazov": {
+          "name": "nazov",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ico": {
+          "name": "ico",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dic": {
+          "name": "dic",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ic_dph": {
+          "name": "ic_dph",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "je_platitel_dph": {
+          "name": "je_platitel_dph",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "ulica": {
+          "name": "ulica",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mesto": {
+          "name": "mesto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "psc": {
+          "name": "psc",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "krajina": {
+          "name": "krajina",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Slovensko'"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefon": {
+          "name": "telefon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "web": {
+          "name": "web",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "iban": {
+          "name": "iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bic": {
+          "name": "bic",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "banka": {
+          "name": "banka",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "logo_url": {
+          "name": "logo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "zapis_v": {
+          "name": "zapis_v",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "paticka_text": {
+          "name": "paticka_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "splatnost_dni": {
+          "name": "splatnost_dni",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 14
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.odoslane_maily": {
+      "name": "odoslane_maily",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "faktura_id": {
+          "name": "faktura_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prijemca": {
+          "name": "prijemca",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kopia": {
+          "name": "kopia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "predmet": {
+          "name": "predmet",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telo": {
+          "name": "telo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prilohy": {
+          "name": "prilohy",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stav": {
+          "name": "stav",
+          "type": "mail_stav",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'CAKA'"
+        },
+        "chyba": {
+          "name": "chyba",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pokusy": {
+          "name": "pokusy",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "odoslany_dna": {
+          "name": "odoslany_dna",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "odoslane_maily_stav_idx": {
+          "name": "odoslane_maily_stav_idx",
+          "columns": [
+            {
+              "expression": "stav",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "odoslane_maily_faktura_id_faktury_id_fk": {
+          "name": "odoslane_maily_faktura_id_faktury_id_fk",
+          "tableFrom": "odoslane_maily",
+          "tableTo": "faktury",
+          "columnsFrom": [
+            "faktura_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.partneri": {
+      "name": "partneri",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "typ": {
+          "name": "typ",
+          "type": "partner_typ",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'OBOJE'"
+        },
+        "nazov": {
+          "name": "nazov",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ico": {
+          "name": "ico",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dic": {
+          "name": "dic",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ic_dph": {
+          "name": "ic_dph",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "je_platitel_dph": {
+          "name": "je_platitel_dph",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "ulica": {
+          "name": "ulica",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mesto": {
+          "name": "mesto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "psc": {
+          "name": "psc",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "krajina": {
+          "name": "krajina",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'SK'"
+        },
+        "iban": {
+          "name": "iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefon": {
+          "name": "telefon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "poznamka": {
+          "name": "poznamka",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "archivovany": {
+          "name": "archivovany",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "partneri_ico_idx": {
+          "name": "partneri_ico_idx",
+          "columns": [
+            {
+              "expression": "ico",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "partneri_nazov_idx": {
+          "name": "partneri_nazov_idx",
+          "columns": [
+            {
+              "expression": "nazov",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pouzivatelia": {
+      "name": "pouzivatelia",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meno": {
+          "name": "meno",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "heslo": {
+          "name": "heslo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rola": {
+          "name": "rola",
+          "type": "rola",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'UCTOVNIK'"
+        },
+        "aktivny": {
+          "name": "aktivny",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "posledny_login": {
+          "name": "posledny_login",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "pouzivatelia_email_unique": {
+          "name": "pouzivatelia_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.prijate_doklady": {
+      "name": "prijate_doklady",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "typ": {
+          "name": "typ",
+          "type": "doklad_typ",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'BLOCEK'"
+        },
+        "cislo_dokladu": {
+          "name": "cislo_dokladu",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dodavatel_id": {
+          "name": "dodavatel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "zakazka_id": {
+          "name": "zakazka_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kategoria": {
+          "name": "kategoria",
+          "type": "kategoria",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'MATERIAL'"
+        },
+        "zdroj": {
+          "name": "zdroj",
+          "type": "zdroj_dokladu",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'RUCNE'"
+        },
+        "datum_vystavenia": {
+          "name": "datum_vystavenia",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "datum_dodania": {
+          "name": "datum_dodania",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datum_splatnosti": {
+          "name": "datum_splatnosti",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "variabilny_symbol": {
+          "name": "variabilny_symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "zaklad_dph": {
+          "name": "zaklad_dph",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "sadzba_dph": {
+          "name": "sadzba_dph",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 23
+        },
+        "suma_dph": {
+          "name": "suma_dph",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "suma_celkom": {
+          "name": "suma_celkom",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "mena": {
+          "name": "mena",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'EUR'"
+        },
+        "prenos_dph": {
+          "name": "prenos_dph",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "stav": {
+          "name": "stav",
+          "type": "doklad_stav",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'NOVY'"
+        },
+        "popis": {
+          "name": "popis",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "poznamka": {
+          "name": "poznamka",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "zamietnutie_dovod": {
+          "name": "zamietnutie_dovod",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subor_url": {
+          "name": "subor_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subor_nazov": {
+          "name": "subor_nazov",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subor_typ": {
+          "name": "subor_typ",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ocr_data": {
+          "name": "ocr_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ocr_confidence": {
+          "name": "ocr_confidence",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ocr_spustene": {
+          "name": "ocr_spustene",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "uhradeny_dna": {
+          "name": "uhradeny_dna",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_pohyb_id": {
+          "name": "bank_pohyb_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vytvoril_id": {
+          "name": "vytvoril_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "schvalil_id": {
+          "name": "schvalil_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schvaleny_dna": {
+          "name": "schvaleny_dna",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exportovany_dna": {
+          "name": "exportovany_dna",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "doklady_datum_idx": {
+          "name": "doklady_datum_idx",
+          "columns": [
+            {
+              "expression": "datum_vystavenia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "doklady_zakazka_idx": {
+          "name": "doklady_zakazka_idx",
+          "columns": [
+            {
+              "expression": "zakazka_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "doklady_stav_idx": {
+          "name": "doklady_stav_idx",
+          "columns": [
+            {
+              "expression": "stav",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "doklady_dodavatel_idx": {
+          "name": "doklady_dodavatel_idx",
+          "columns": [
+            {
+              "expression": "dodavatel_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "doklady_bank_pohyb_idx": {
+          "name": "doklady_bank_pohyb_idx",
+          "columns": [
+            {
+              "expression": "bank_pohyb_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "prijate_doklady_dodavatel_id_partneri_id_fk": {
+          "name": "prijate_doklady_dodavatel_id_partneri_id_fk",
+          "tableFrom": "prijate_doklady",
+          "tableTo": "partneri",
+          "columnsFrom": [
+            "dodavatel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "prijate_doklady_zakazka_id_zakazky_id_fk": {
+          "name": "prijate_doklady_zakazka_id_zakazky_id_fk",
+          "tableFrom": "prijate_doklady",
+          "tableTo": "zakazky",
+          "columnsFrom": [
+            "zakazka_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "prijate_doklady_bank_pohyb_id_bank_pohyby_id_fk": {
+          "name": "prijate_doklady_bank_pohyb_id_bank_pohyby_id_fk",
+          "tableFrom": "prijate_doklady",
+          "tableTo": "bank_pohyby",
+          "columnsFrom": [
+            "bank_pohyb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "prijate_doklady_vytvoril_id_pouzivatelia_id_fk": {
+          "name": "prijate_doklady_vytvoril_id_pouzivatelia_id_fk",
+          "tableFrom": "prijate_doklady",
+          "tableTo": "pouzivatelia",
+          "columnsFrom": [
+            "vytvoril_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "prijate_doklady_schvalil_id_pouzivatelia_id_fk": {
+          "name": "prijate_doklady_schvalil_id_pouzivatelia_id_fk",
+          "tableFrom": "prijate_doklady",
+          "tableTo": "pouzivatelia",
+          "columnsFrom": [
+            "schvalil_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.prijate_maily": {
+      "name": "prijate_maily",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "message_id": {
+          "name": "message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "odosielatel": {
+          "name": "odosielatel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "predmet": {
+          "name": "predmet",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datum": {
+          "name": "datum",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telo": {
+          "name": "telo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pocet_priloh": {
+          "name": "pocet_priloh",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "stav": {
+          "name": "stav",
+          "type": "prijaty_mail_stav",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'NOVY'"
+        },
+        "chyba": {
+          "name": "chyba",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vytvorene_doklady": {
+          "name": "vytvorene_doklady",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "prijate_maily_stav_idx": {
+          "name": "prijate_maily_stav_idx",
+          "columns": [
+            {
+              "expression": "stav",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "prijate_maily_datum_idx": {
+          "name": "prijate_maily_datum_idx",
+          "columns": [
+            {
+              "expression": "datum",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "prijate_maily_message_id_unique": {
+          "name": "prijate_maily_message_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "message_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.uhrady": {
+      "name": "uhrady",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "faktura_id": {
+          "name": "faktura_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bank_pohyb_id": {
+          "name": "bank_pohyb_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datum": {
+          "name": "datum",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "suma": {
+          "name": "suma",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sposob": {
+          "name": "sposob",
+          "type": "forma_uhrady",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PREVOD'"
+        },
+        "automaticke": {
+          "name": "automaticke",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "poznamka": {
+          "name": "poznamka",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "uhrady_faktura_idx": {
+          "name": "uhrady_faktura_idx",
+          "columns": [
+            {
+              "expression": "faktura_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "uhrady_faktura_id_faktury_id_fk": {
+          "name": "uhrady_faktura_id_faktury_id_fk",
+          "tableFrom": "uhrady",
+          "tableTo": "faktury",
+          "columnsFrom": [
+            "faktura_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "uhrady_bank_pohyb_id_bank_pohyby_id_fk": {
+          "name": "uhrady_bank_pohyb_id_bank_pohyby_id_fk",
+          "tableFrom": "uhrady",
+          "tableTo": "bank_pohyby",
+          "columnsFrom": [
+            "bank_pohyb_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.zakazky": {
+      "name": "zakazky",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kod": {
+          "name": "kod",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nazov": {
+          "name": "nazov",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adresa": {
+          "name": "adresa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "investor": {
+          "name": "investor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stav": {
+          "name": "stav",
+          "type": "zakazka_stav",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'AKTIVNA'"
+        },
+        "datum_start": {
+          "name": "datum_start",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datum_koniec": {
+          "name": "datum_koniec",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rozpocet": {
+          "name": "rozpocet",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "poznamka": {
+          "name": "poznamka",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "zakazky_kod_unique": {
+          "name": "zakazky_kod_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "kod"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.doklad_stav": {
+      "name": "doklad_stav",
+      "schema": "public",
+      "values": [
+        "NOVY",
+        "NA_SCHVALENIE",
+        "SCHVALENY",
+        "ZAMIETNUTY",
+        "ZAUCTOVANY"
+      ]
+    },
+    "public.doklad_typ": {
+      "name": "doklad_typ",
+      "schema": "public",
+      "values": [
+        "BLOCEK",
+        "FAKTURA_PRIJATA",
+        "POKLADNICNY_VYDAJ",
+        "INY"
+      ]
+    },
+    "public.faktura_stav": {
+      "name": "faktura_stav",
+      "schema": "public",
+      "values": [
+        "KONCEPT",
+        "ODOSLANA",
+        "CIASTOCNE_UHRADENA",
+        "UHRADENA",
+        "PO_SPLATNOSTI",
+        "STORNO"
+      ]
+    },
+    "public.faktura_typ": {
+      "name": "faktura_typ",
+      "schema": "public",
+      "values": [
+        "BEZNA",
+        "ZALOHOVA",
+        "DOBROPIS"
+      ]
+    },
+    "public.forma_uhrady": {
+      "name": "forma_uhrady",
+      "schema": "public",
+      "values": [
+        "PREVOD",
+        "HOTOVOST",
+        "KARTA",
+        "DOBIERKA"
+      ]
+    },
+    "public.kategoria": {
+      "name": "kategoria",
+      "schema": "public",
+      "values": [
+        "MATERIAL",
+        "PALIVO",
+        "NARADIE",
+        "SUBDODAVKA",
+        "SLUZBY",
+        "REZIA",
+        "DOPRAVA",
+        "INE"
+      ]
+    },
+    "public.mail_stav": {
+      "name": "mail_stav",
+      "schema": "public",
+      "values": [
+        "CAKA",
+        "ODOSLANY",
+        "CHYBA"
+      ]
+    },
+    "public.partner_typ": {
+      "name": "partner_typ",
+      "schema": "public",
+      "values": [
+        "ODBERATEL",
+        "DODAVATEL",
+        "OBOJE"
+      ]
+    },
+    "public.prijaty_mail_stav": {
+      "name": "prijaty_mail_stav",
+      "schema": "public",
+      "values": [
+        "NOVY",
+        "SPRACOVANY",
+        "IGNOROVANY",
+        "CHYBA"
+      ]
+    },
+    "public.rola": {
+      "name": "rola",
+      "schema": "public",
+      "values": [
+        "MAJITEL",
+        "UCTOVNIK"
+      ]
+    },
+    "public.smer": {
+      "name": "smer",
+      "schema": "public",
+      "values": [
+        "PRICHOD",
+        "ODCHOD"
+      ]
+    },
+    "public.zakazka_stav": {
+      "name": "zakazka_stav",
+      "schema": "public",
+      "values": [
+        "PRIPRAVA",
+        "AKTIVNA",
+        "UKONCENA",
+        "ZRUSENA"
+      ]
+    },
+    "public.zdroj_dokladu": {
+      "name": "zdroj_dokladu",
+      "schema": "public",
+      "values": [
+        "RUCNE",
+        "EMAIL",
+        "MOBIL",
+        "API"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
