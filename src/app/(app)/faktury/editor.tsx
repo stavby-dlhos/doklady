@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ulozFakturu, type FakturaFormular, type PolozkaFormular } from "./akcie";
+import { vysledok } from "@/lib/chyby";
 import { Karta, Pole, Vstup, Vyber, TextovePole, Tlacidlo, Chyba, Info } from "@/components/ui";
 import { MERNE_JEDNOTKY, FORMA_UHRADY, naInputDatum } from "@/lib/stavy";
 import { SADZBY_DPH, POZNAMKA_PRENOS_DPH } from "@/lib/dph";
@@ -93,7 +94,7 @@ export function EditorFaktury({
     setChyba(null);
     start(async () => {
       try {
-        const { id } = await ulozFakturu(f);
+        const { id } = await vysledok(ulozFakturu(f));
         router.push(`/faktury/${id}`);
       } catch (e) {
         setChyba(e instanceof Error ? e.message : "Uloženie zlyhalo.");

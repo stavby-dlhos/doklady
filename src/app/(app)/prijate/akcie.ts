@@ -11,6 +11,7 @@ import { vytazDoklad } from "@/lib/ocr";
 import { centsToDb, toCents } from "@/lib/money";
 import { rozpocitajZCelkovej, normalizujSadzbu } from "@/lib/dph";
 import { zInputDatumu } from "@/lib/stavy";
+import { ChybaVstupu, obal } from "@/lib/chyby";
 
 const MAX_SUBOR = 20 * 1024 * 1024;
 
@@ -24,7 +25,7 @@ async function zapisAudit(
 }
 
 /** Nahranie súboru + OCR. Vracia predvyplnené hodnoty pre formulár. */
-export async function nahrajASkusOcr(formData: FormData) {
+async function nahrajASkusOcrTelo(formData: FormData) {
   const session = await vyzadujPrihlasenie();
   const subor = formData.get("subor");
 
@@ -68,7 +69,7 @@ export async function nahrajASkusOcr(formData: FormData) {
   };
 }
 
-export async function ulozDoklad(formData: FormData) {
+async function ulozDokladTelo(formData: FormData) {
   const session = await vyzadujPrihlasenie();
 
   const id = String(formData.get("id") ?? "");
@@ -77,11 +78,11 @@ export async function ulozDoklad(formData: FormData) {
   const sadzba = prenosDph ? 0 : normalizujSadzbu(Number(formData.get("sadzbaDph") ?? 23));
 
   if (sumaCelkom <= 0) {
-    throw new Error("Celková suma musí byť väčšia než nula.");
+    throw new ChybaVstupu("Celková suma musí byť väčšia než nula.");
   }
 
   const datumVystavenia = zInputDatumu(String(formData.get("datumVystavenia") ?? ""));
-  if (!datumVystavenia) throw new Error("Dátum vystavenia je povinný.");
+  if (!datumVystavenia) throw new ChybaVstupu("Dátum vystavenia je povinný.");
 
   // Ak používateľ zadal základ ručne a sedí, rešpektujeme ho. Inak rozpočítame.
   const zadanyZaklad = toCents(String(formData.get("zakladDph") ?? "0"));
@@ -140,7 +141,7 @@ export async function ulozDoklad(formData: FormData) {
   redirect(`/prijate/${novy.id}`);
 }
 
-export async function schvalDoklad(id: string) {
+async function schvalDokladTelo(id: string) {
   const session = await vyzadujMajitela();
   await db
     .update(prijateDoklady)
@@ -152,9 +153,9 @@ export async function schvalDoklad(id: string) {
   revalidatePath("/");
 }
 
-export async function zamietniDoklad(id: string, dovod: string) {
+async function zamietniDokladTelo(id: string, dovod: string) {
   const session = await vyzadujMajitela();
-  if (!dovod.trim()) throw new Error("Uveď dôvod zamietnutia.");
+  if (!dovod.trim()) throw new ChybaVstupu("Uveď dôvod zamietnutia.");
   await db
     .update(prijateDoklady)
     .set({ stav: "ZAMIETNUTY", schvalilId: session.id, schvalenyDna: new Date(), zamietnutieDovod: dovod })
@@ -164,11 +165,11 @@ export async function zamietniDoklad(id: string, dovod: string) {
   revalidatePath("/prijate");
 }
 
-export async function zmazDoklad(id: string) {
+async function zmazDokladTelo(id: string) {
   const session = await vyzadujMajitela();
   const [d] = await db.select().from(prijateDoklady).where(eq(prijateDoklady.id, id)).limit(1);
-  if (!d) throw new Error("Doklad sa nenašiel.");
-  if (d.stav === "ZAUCTOVANY") throw new Error("Zaúčtovaný doklad sa nedá zmazať.");
+  if (!d) throw new ChybaVstupu("Doklad sa nenašiel.");
+  if (d.stav === "ZAUCTOVANY") throw new ChybaVstupu("Zaúčtovaný doklad sa nedá zmazať.");
 
   await db.delete(prijateDoklady).where(eq(prijateDoklady.id, id));
   if (d.suborUrl) await zmazSubor(d.suborUrl);
@@ -179,10 +180,10 @@ export async function zmazDoklad(id: string) {
 }
 
 /** Znovu spustí OCR nad už uloženým súborom. */
-export async function preskenuj(id: string) {
+async function preskenujTelo(id: string) {
   const session = await vyzadujPrihlasenie();
   const [d] = await db.select().from(prijateDoklady).where(eq(prijateDoklady.id, id)).limit(1);
-  if (!d?.suborUrl) throw new Error("Doklad nemá nahraný súbor.");
+  if (!d?.suborUrl) throw new ChybaVstupu("Doklad nemá nahraný súbor.");
 
   const { nacitajSubor } = await import("@/lib/storage");
   const data = await nacitajSubor(d.suborUrl);
@@ -219,4 +220,30 @@ export async function preskenuj(id: string) {
 function str(v: FormDataEntryValue | null): string | null {
   const s = v === null ? "" : String(v).trim();
   return s.length ? s : null;
+}
+
+/* Chyby vstupu sa vracajú, nevyhadzujú – pozri src/lib/chyby.ts. */
+
+export async function nahrajASkusOcr(...argumenty: Parameters<typeof nahrajASkusOcrTelo>) {
+  return obal(() => nahrajASkusOcrTelo(...argumenty));
+}
+
+export async function ulozDoklad(...argumenty: Parameters<typeof ulozDokladTelo>) {
+  return obal(() => ulozDokladTelo(...argumenty));
+}
+
+export async function schvalDoklad(...argumenty: Parameters<typeof schvalDokladTelo>) {
+  return obal(() => schvalDokladTelo(...argumenty));
+}
+
+export async function zamietniDoklad(...argumenty: Parameters<typeof zamietniDokladTelo>) {
+  return obal(() => zamietniDokladTelo(...argumenty));
+}
+
+export async function zmazDoklad(...argumenty: Parameters<typeof zmazDokladTelo>) {
+  return obal(() => zmazDokladTelo(...argumenty));
+}
+
+export async function preskenuj(...argumenty: Parameters<typeof preskenujTelo>) {
+  return obal(() => preskenujTelo(...argumenty));
 }

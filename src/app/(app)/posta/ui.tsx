@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { skontrolujSchranku, otestujOdosielanie, skusZnovaOdoslat } from "./akcie";
 import { Karta, Tlacidlo, Chyba, Uspech, Info } from "@/components/ui";
+import { vysledok } from "@/lib/chyby";
 
 export function PanelPodatelne({
   adresa,
@@ -38,7 +39,13 @@ export function PanelPodatelne({
             onClick={() => {
               setSprava(null);
               start(async () => {
-                const v = await skontrolujSchranku();
+                let v;
+                try {
+                  v = await vysledok(skontrolujSchranku());
+                } catch (e) {
+                  setSprava({ typ: "chyba", text: e instanceof Error ? e.message : "Kontrola schránky zlyhala." });
+                  return;
+                }
                 if (!v.ok) {
                   setSprava({ typ: "chyba", text: v.chyba });
                   return;
@@ -63,7 +70,13 @@ export function PanelPodatelne({
             onClick={() => {
               setSprava(null);
               start(async () => {
-                const v = await otestujOdosielanie();
+                let v;
+                try {
+                  v = await vysledok(otestujOdosielanie());
+                } catch (e) {
+                  setSprava({ typ: "chyba", text: e instanceof Error ? e.message : "Test odosielania zlyhal." });
+                  return;
+                }
                 setSprava(
                   v.ok
                     ? { typ: "uspech", text: "Spojenie s odosielacím serverom funguje." }
@@ -81,7 +94,13 @@ export function PanelPodatelne({
             onClick={() => {
               setSprava(null);
               start(async () => {
-                const v = await skusZnovaOdoslat();
+                let v;
+                try {
+                  v = await vysledok(skusZnovaOdoslat());
+                } catch (e) {
+                  setSprava({ typ: "chyba", text: e instanceof Error ? e.message : "Odoslanie zlyhalo." });
+                  return;
+                }
                 setSprava({
                   typ: "info",
                   text: v.pokusov === 0 ? "Žiadne neúspešné maily na opätovné odoslanie." : `Znovu odoslaných ${v.uspesnych} z ${v.pokusov}.`,

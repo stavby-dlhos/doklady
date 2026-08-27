@@ -13,6 +13,7 @@ import { zInputDatumu } from "@/lib/stavy";
 import { qrPreFakturu } from "@/lib/paybysquare";
 import { vygenerujFakturuPdf } from "@/lib/pdf/faktura";
 import { posliMail } from "@/lib/mail-odoslanie";
+import { ChybaVstupu, obal } from "@/lib/chyby";
 
 export interface PolozkaFormular {
   skupina: string;
@@ -59,21 +60,41 @@ function spocitaj(vstup: FakturaFormular) {
   return { vypocty, rekapitulacia: vypocitajRekapitulaciu(vypocty, vstup.prenosDph) };
 }
 
-export async function ulozFakturu(vstup: FakturaFormular): Promise<{ id: string }> {
+/**
+ * Riadok, do ktorého nikto nič nenapísal.
+ *
+ * Množstvo a merná jednotka sa nepočítajú – tie sú predvyplnené („1 ks")
+ * a samy o sebe neznamenajú, že používateľ riadok naozaj chcel. Rozhoduje
+ * názov, popis, skupina a cena.
+ */
+function jePrazdnyRiadok(p: PolozkaFormular): boolean {
+  return !p.nazov.trim() && !p.popis.trim() && !p.skupina.trim() && parseCislo(p.cenaZaMj) === 0;
+}
+
+async function ulozFakturuTelo(vstupPrichodzi: FakturaFormular): Promise<{ id: string }> {
   const session = await vyzadujPrihlasenie();
 
-  if (!vstup.odberatelId) throw new Error("Vyber odberateľa.");
-  if (!vstup.polozky.length) throw new Error("Faktúra musí mať aspoň jednu položku.");
-  if (vstup.polozky.some((p) => !p.nazov.trim())) throw new Error("Každá položka musí mať názov.");
+  // Formulár vždy ponúka jeden prázdny riadok navyše. Nedopísaný riadok je
+  // len nedotknutá ponuka, nie chyba – zahodíme ho a faktúru uložíme.
+  const vstup: FakturaFormular = {
+    ...vstupPrichodzi,
+    polozky: vstupPrichodzi.polozky.filter((p) => !jePrazdnyRiadok(p)),
+  };
+
+  if (!vstup.odberatelId) throw new ChybaVstupu("Vyber odberateľa.");
+  if (!vstup.polozky.length) throw new ChybaVstupu("Faktúra musí mať aspoň jednu položku s názvom a cenou.");
+
+  const bezNazvu = vstup.polozky.findIndex((p) => !p.nazov.trim());
+  if (bezNazvu >= 0) throw new ChybaVstupu(`Položka č. ${bezNazvu + 1} nemá názov — doplň ho alebo riadok zmaž.`);
 
   const datumVystavenia = zInputDatumu(vstup.datumVystavenia);
   const datumDodania = zInputDatumu(vstup.datumDodania);
   const datumSplatnosti = zInputDatumu(vstup.datumSplatnosti);
-  if (!datumVystavenia || !datumDodania || !datumSplatnosti) throw new Error("Vyplň všetky tri dátumy.");
-  if (datumSplatnosti < datumVystavenia) throw new Error("Splatnosť nemôže byť pred dátumom vystavenia.");
+  if (!datumVystavenia || !datumDodania || !datumSplatnosti) throw new ChybaVstupu("Vyplň všetky tri dátumy.");
+  if (datumSplatnosti < datumVystavenia) throw new ChybaVstupu("Splatnosť nemôže byť pred dátumom vystavenia.");
 
   const { vypocty, rekapitulacia: r } = spocitaj(vstup);
-  if (r.sumaCelkom <= 0) throw new Error("Celková suma faktúry musí byť väčšia než nula.");
+  if (r.sumaCelkom <= 0) throw new ChybaVstupu("Celková suma faktúry musí byť väčšia než nula.");
 
   const spolocne = {
     odberatelId: vstup.odberatelId,
@@ -103,9 +124,9 @@ export async function ulozFakturu(vstup: FakturaFormular): Promise<{ id: string 
 
     if (vstup.id) {
       const [existujuca] = await tx.select().from(faktury).where(eq(faktury.id, vstup.id)).limit(1);
-      if (!existujuca) throw new Error("Faktúra sa nenašla.");
+      if (!existujuca) throw new ChybaVstupu("Faktúra sa nenašla.");
       if (existujuca.stav !== "KONCEPT") {
-        throw new Error("Upraviť sa dá len koncept. Odoslanú faktúru stornuj a vystav novú.");
+        throw new ChybaVstupu("Upraviť sa dá len koncept. Odoslanú faktúru stornuj a vystav novú.");
       }
 
       await tx.update(faktury).set({ ...spolocne, pdfUrl: null }).where(eq(faktury.id, vstup.id));
@@ -171,10 +192,10 @@ export async function zostavPdf(id: string): Promise<{ pdf: Buffer; nazov: strin
     .where(eq(faktury.id, id))
     .limit(1);
 
-  if (!zaznam?.odberatel) throw new Error("Faktúra alebo odberateľ sa nenašli.");
+  if (!zaznam?.odberatel) throw new ChybaVstupu("Faktúra alebo odberateľ sa nenašli.");
 
   const [nastavenia] = await db.select().from(firma).where(eq(firma.id, "firma")).limit(1);
-  if (!nastavenia) throw new Error("Nie sú vyplnené údaje firmy. Doplň ich v Nastaveniach.");
+  if (!nastavenia) throw new ChybaVstupu("Nie sú vyplnené údaje firmy. Doplň ich v Nastaveniach.");
 
   const polozky = await db
     .select()
@@ -210,7 +231,7 @@ export async function zostavPdf(id: string): Promise<{ pdf: Buffer; nazov: strin
   return { pdf, nazov: `faktura-${zaznam.f.cislo}.pdf`, cislo: zaznam.f.cislo };
 }
 
-export async function odosliFakturu(id: string, prijemca: string, sprava: string, kopiaMne: boolean) {
+async function odosliFakturuTelo(id: string, prijemca: string, sprava: string, kopiaMne: boolean) {
   const session = await vyzadujPrihlasenie();
 
   const [zaznam] = await db
@@ -220,9 +241,9 @@ export async function odosliFakturu(id: string, prijemca: string, sprava: string
     .where(eq(faktury.id, id))
     .limit(1);
 
-  if (!zaznam) throw new Error("Faktúra sa nenašla.");
-  if (zaznam.f.stav === "STORNO") throw new Error("Stornovanú faktúru nemožno odoslať.");
-  if (!prijemca.includes("@")) throw new Error("Zadaj platnú e-mailovú adresu.");
+  if (!zaznam) throw new ChybaVstupu("Faktúra sa nenašla.");
+  if (zaznam.f.stav === "STORNO") throw new ChybaVstupu("Stornovanú faktúru nemožno odoslať.");
+  if (!prijemca.includes("@")) throw new ChybaVstupu("Zadaj platnú e-mailovú adresu.");
 
   const [nastavenia] = await db.select().from(firma).where(eq(firma.id, "firma")).limit(1);
   const { pdf, nazov } = await zostavPdf(id);
@@ -237,7 +258,7 @@ export async function odosliFakturu(id: string, prijemca: string, sprava: string
   });
 
   if (!vysledok.odoslany) {
-    throw new Error(`Mail sa nepodarilo odoslať: ${vysledok.chyba}`);
+    throw new ChybaVstupu(`Mail sa nepodarilo odoslať: ${vysledok.chyba}`);
   }
 
   // Koncept sa odoslaním stáva ostrou faktúrou.
@@ -257,11 +278,11 @@ export async function odosliFakturu(id: string, prijemca: string, sprava: string
 }
 
 /** Označí faktúru ako odoslanú bez posielania mailu (napr. odovzdaná osobne). */
-export async function oznacAkoOdoslanu(id: string) {
+async function oznacAkoOdoslanuTelo(id: string) {
   const session = await vyzadujPrihlasenie();
   const [f] = await db.select().from(faktury).where(eq(faktury.id, id)).limit(1);
-  if (!f) throw new Error("Faktúra sa nenašla.");
-  if (f.stav !== "KONCEPT") throw new Error("Len koncept sa dá označiť ako odoslaný.");
+  if (!f) throw new ChybaVstupu("Faktúra sa nenašla.");
+  if (f.stav !== "KONCEPT") throw new ChybaVstupu("Len koncept sa dá označiť ako odoslaný.");
 
   await db.update(faktury).set({ stav: "ODOSLANA", odoslanaDna: new Date() }).where(eq(faktury.id, id));
   await audit(id, "ODOSLANIE", session.id, "ručne bez mailu");
@@ -269,21 +290,21 @@ export async function oznacAkoOdoslanu(id: string) {
   revalidatePath("/faktury");
 }
 
-export async function pridajUhradu(id: string, suma: string, datum: string, sposob: string) {
+async function pridajUhraduTelo(id: string, suma: string, datum: string, sposob: string) {
   const session = await vyzadujPrihlasenie();
 
   const [f] = await db.select().from(faktury).where(eq(faktury.id, id)).limit(1);
-  if (!f) throw new Error("Faktúra sa nenašla.");
+  if (!f) throw new ChybaVstupu("Faktúra sa nenašla.");
 
   const sumaCents = toCents(suma);
-  if (sumaCents <= 0) throw new Error("Suma úhrady musí byť kladná.");
+  if (sumaCents <= 0) throw new ChybaVstupu("Suma úhrady musí byť kladná.");
 
   const den = zInputDatumu(datum) ?? new Date();
   const nove = toCents(f.uhradene) + sumaCents;
   const celkom = toCents(f.sumaCelkom);
 
   if (nove > celkom) {
-    throw new Error(
+    throw new ChybaVstupu(
       `Úhrada by presiahla sumu faktúry. Zostáva doplatiť ${formatEur(celkom - toCents(f.uhradene))}.`,
     );
   }
@@ -312,11 +333,11 @@ export async function pridajUhradu(id: string, suma: string, datum: string, spos
   revalidatePath("/");
 }
 
-export async function stornujFakturu(id: string, dovod: string) {
+async function stornujFakturuTelo(id: string, dovod: string) {
   const session = await vyzadujMajitela();
   const [f] = await db.select().from(faktury).where(eq(faktury.id, id)).limit(1);
-  if (!f) throw new Error("Faktúra sa nenašla.");
-  if (f.stav === "UHRADENA") throw new Error("Uhradenú faktúru stornuj dobropisom, nie stornom.");
+  if (!f) throw new ChybaVstupu("Faktúra sa nenašla.");
+  if (f.stav === "UHRADENA") throw new ChybaVstupu("Uhradenú faktúru stornuj dobropisom, nie stornom.");
 
   await db
     .update(faktury)
@@ -328,12 +349,12 @@ export async function stornujFakturu(id: string, dovod: string) {
   revalidatePath("/faktury");
 }
 
-export async function zmazKoncept(id: string) {
+async function zmazKonceptTelo(id: string) {
   const session = await vyzadujPrihlasenie();
   const [f] = await db.select().from(faktury).where(eq(faktury.id, id)).limit(1);
-  if (!f) throw new Error("Faktúra sa nenašla.");
+  if (!f) throw new ChybaVstupu("Faktúra sa nenašla.");
   if (f.stav !== "KONCEPT") {
-    throw new Error("Zmazať sa dá len koncept — číslované faktúry sa nemažú, aby v rade nevznikla diera.");
+    throw new ChybaVstupu("Zmazať sa dá len koncept — číslované faktúry sa nemažú, aby v rade nevznikla diera.");
   }
 
   await db.delete(faktury).where(eq(faktury.id, id));
@@ -345,4 +366,30 @@ export async function zmazKoncept(id: string) {
 function parseCislo(s: string): number {
   const n = parseFloat(String(s).replace(",", ".").replace(/[^\d.-]/g, ""));
   return Number.isFinite(n) ? n : 0;
+}
+
+/* Chyby vstupu sa vracajú, nevyhadzujú – pozri src/lib/chyby.ts. */
+
+export async function ulozFakturu(...argumenty: Parameters<typeof ulozFakturuTelo>) {
+  return obal(() => ulozFakturuTelo(...argumenty));
+}
+
+export async function odosliFakturu(...argumenty: Parameters<typeof odosliFakturuTelo>) {
+  return obal(() => odosliFakturuTelo(...argumenty));
+}
+
+export async function oznacAkoOdoslanu(...argumenty: Parameters<typeof oznacAkoOdoslanuTelo>) {
+  return obal(() => oznacAkoOdoslanuTelo(...argumenty));
+}
+
+export async function pridajUhradu(...argumenty: Parameters<typeof pridajUhraduTelo>) {
+  return obal(() => pridajUhraduTelo(...argumenty));
+}
+
+export async function stornujFakturu(...argumenty: Parameters<typeof stornujFakturuTelo>) {
+  return obal(() => stornujFakturuTelo(...argumenty));
+}
+
+export async function zmazKoncept(...argumenty: Parameters<typeof zmazKonceptTelo>) {
+  return obal(() => zmazKonceptTelo(...argumenty));
 }

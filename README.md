@@ -193,6 +193,7 @@ npm run dev               # http://localhost:3000
 ```bash
 npm run test:vypocty      # DPH, zaokrúhľovanie, parsovanie výpisov
 npm run test:e2e          # celý tok v prehliadači (appka musí bežať)
+npm run test:chyby        # chyby vo formulároch sa zobrazujú používateľovi
 npm run test:prvystart    # úvodná obrazovka na prázdnej databáze
 npm run typecheck
 npm run uloha             # ručné spustenie údržby
@@ -233,6 +234,13 @@ ako s `number` sa nikde nepracuje.
 **Párovanie úhrad je zámerne opatrné.** Spáruje sa len to, čo sedí jednoznačne
 (variabilný symbol aj suma). Zvyšok ostane nespárovaný na ručné priradenie —
 zle spárovaná platba narobí v účtovníctve viac škody než nespárovaná.
+
+**Chyby formulárov sa vracajú, nevyhadzujú.** Next.js v produkcii zahodí text
+každej výnimky zo server akcie a klientovi pošle len anonymný `digest` —
+používateľ by namiesto „Položka č. 1 nemá názov" videl hlášku o chybe aplikácie.
+Preto chyby vstupu putujú cez `ChybaVstupu` a `src/lib/chyby.ts` ako obyčajná
+hodnota a vo formulári sa vypíšu doslova. Skutočné poruchy sa naďalej vyhadzujú
+a Next ich zamaskuje — tak to má byť. Overuje to `npm run test:chyby`.
 
 **Všetko podstatné sa loguje.** Vytvorenie, zmena, schválenie, zamietnutie,
 odoslanie a storno sú v tabuľke `audit_log` aj s tým, kto to urobil.

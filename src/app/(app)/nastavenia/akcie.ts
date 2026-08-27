@@ -6,19 +6,20 @@ import bcrypt from "bcryptjs";
 import { db } from "@/db";
 import { firma, ciselneRady, pouzivatelia } from "@/db/schema";
 import { vyzadujMajitela, vyzadujPrihlasenie, overHeslo } from "@/lib/auth";
+import { ChybaVstupu, obal } from "@/lib/chyby";
 
-export async function ulozFirmu(formData: FormData) {
+async function ulozFirmuTelo(formData: FormData) {
   await vyzadujMajitela();
 
   const nazov = String(formData.get("nazov") ?? "").trim();
   const ico = String(formData.get("ico") ?? "").replace(/\D/g, "");
 
-  if (!nazov) throw new Error("Zadaj názov firmy.");
-  if (ico.length !== 8) throw new Error("IČO musí mať 8 číslic.");
+  if (!nazov) throw new ChybaVstupu("Zadaj názov firmy.");
+  if (ico.length !== 8) throw new ChybaVstupu("IČO musí mať 8 číslic.");
 
   const iban = String(formData.get("iban") ?? "").replace(/\s/g, "").toUpperCase();
   if (iban && !/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(iban)) {
-    throw new Error("IBAN nemá platný tvar.");
+    throw new ChybaVstupu("IBAN nemá platný tvar.");
   }
 
   const hodnoty = {
@@ -54,7 +55,7 @@ export async function ulozFirmu(formData: FormData) {
   revalidatePath("/faktury");
 }
 
-export async function ulozRadu(formData: FormData) {
+async function ulozRaduTelo(formData: FormData) {
   await vyzadujMajitela();
 
   const id = String(formData.get("id") ?? "");
@@ -63,11 +64,11 @@ export async function ulozRadu(formData: FormData) {
   const posledneCislo = Math.max(0, Number(formData.get("posledneCislo") ?? 0));
 
   const [rada] = await db.select().from(ciselneRady).where(eq(ciselneRady.id, id)).limit(1);
-  if (!rada) throw new Error("Číselná rada sa nenašla.");
+  if (!rada) throw new ChybaVstupu("Číselná rada sa nenašla.");
 
   // Posunúť počítadlo dozadu by znamenalo duplicitné čísla faktúr.
   if (posledneCislo < rada.posledneCislo) {
-    throw new Error(
+    throw new ChybaVstupu(
       `Počítadlo sa nedá znížiť pod ${rada.posledneCislo} — vznikli by dve faktúry s rovnakým číslom.`,
     );
   }
@@ -80,20 +81,20 @@ export async function ulozRadu(formData: FormData) {
   revalidatePath("/nastavenia");
 }
 
-export async function zmenHeslo(formData: FormData) {
+async function zmenHesloTelo(formData: FormData) {
   const session = await vyzadujPrihlasenie();
 
   const stare = String(formData.get("stareHeslo") ?? "");
   const nove = String(formData.get("noveHeslo") ?? "");
   const znova = String(formData.get("noveHesloZnova") ?? "");
 
-  if (nove.length < 10) throw new Error("Nové heslo musí mať aspoň 10 znakov.");
-  if (nove !== znova) throw new Error("Nové heslá sa nezhodujú.");
+  if (nove.length < 10) throw new ChybaVstupu("Nové heslo musí mať aspoň 10 znakov.");
+  if (nove !== znova) throw new ChybaVstupu("Nové heslá sa nezhodujú.");
 
   const [u] = await db.select().from(pouzivatelia).where(eq(pouzivatelia.id, session.id)).limit(1);
-  if (!u) throw new Error("Používateľ sa nenašiel.");
+  if (!u) throw new ChybaVstupu("Používateľ sa nenašiel.");
 
-  if (!(await overHeslo(stare, u.heslo))) throw new Error("Súčasné heslo nie je správne.");
+  if (!(await overHeslo(stare, u.heslo))) throw new ChybaVstupu("Súčasné heslo nie je správne.");
 
   await db
     .update(pouzivatelia)
@@ -103,7 +104,7 @@ export async function zmenHeslo(formData: FormData) {
   revalidatePath("/nastavenia");
 }
 
-export async function pridajPouzivatela(formData: FormData) {
+async function pridajPouzivatelaTelo(formData: FormData) {
   await vyzadujMajitela();
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
@@ -111,20 +112,20 @@ export async function pridajPouzivatela(formData: FormData) {
   const heslo = String(formData.get("heslo") ?? "");
   const rola = String(formData.get("rola") ?? "UCTOVNIK") as "MAJITEL" | "UCTOVNIK";
 
-  if (!email.includes("@")) throw new Error("Zadaj platný e-mail.");
-  if (!meno) throw new Error("Zadaj meno.");
-  if (heslo.length < 10) throw new Error("Heslo musí mať aspoň 10 znakov.");
+  if (!email.includes("@")) throw new ChybaVstupu("Zadaj platný e-mail.");
+  if (!meno) throw new ChybaVstupu("Zadaj meno.");
+  if (heslo.length < 10) throw new ChybaVstupu("Heslo musí mať aspoň 10 znakov.");
 
   const [existujuci] = await db.select().from(pouzivatelia).where(eq(pouzivatelia.email, email)).limit(1);
-  if (existujuci) throw new Error("Používateľ s týmto e-mailom už existuje.");
+  if (existujuci) throw new ChybaVstupu("Používateľ s týmto e-mailom už existuje.");
 
   await db.insert(pouzivatelia).values({ email, meno, heslo: await bcrypt.hash(heslo, 12), rola });
   revalidatePath("/nastavenia");
 }
 
-export async function prepniPouzivatela(id: string, aktivny: boolean) {
+async function prepniPouzivatelaTelo(id: string, aktivny: boolean) {
   const session = await vyzadujMajitela();
-  if (id === session.id) throw new Error("Vlastný účet nemôžeš deaktivovať.");
+  if (id === session.id) throw new ChybaVstupu("Vlastný účet nemôžeš deaktivovať.");
 
   await db.update(pouzivatelia).set({ aktivny }).where(eq(pouzivatelia.id, id));
   revalidatePath("/nastavenia");
@@ -133,4 +134,26 @@ export async function prepniPouzivatela(id: string, aktivny: boolean) {
 function str(v: FormDataEntryValue | null): string | null {
   const s = v === null ? "" : String(v).trim();
   return s.length ? s : null;
+}
+
+/* Chyby vstupu sa vracajú, nevyhadzujú – pozri src/lib/chyby.ts. */
+
+export async function ulozFirmu(...argumenty: Parameters<typeof ulozFirmuTelo>) {
+  return obal(() => ulozFirmuTelo(...argumenty));
+}
+
+export async function ulozRadu(...argumenty: Parameters<typeof ulozRaduTelo>) {
+  return obal(() => ulozRaduTelo(...argumenty));
+}
+
+export async function zmenHeslo(...argumenty: Parameters<typeof zmenHesloTelo>) {
+  return obal(() => zmenHesloTelo(...argumenty));
+}
+
+export async function pridajPouzivatela(...argumenty: Parameters<typeof pridajPouzivatelaTelo>) {
+  return obal(() => pridajPouzivatelaTelo(...argumenty));
+}
+
+export async function prepniPouzivatela(...argumenty: Parameters<typeof prepniPouzivatelaTelo>) {
+  return obal(() => prepniPouzivatelaTelo(...argumenty));
 }

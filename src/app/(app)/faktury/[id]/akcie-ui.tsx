@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { odosliFakturu, oznacAkoOdoslanu, pridajUhradu, stornujFakturu, zmazKoncept } from "../akcie";
 import { Tlacidlo, TextovePole, Vstup, Vyber, Chyba, Uspech, Pole } from "@/components/ui";
 import { FORMA_UHRADY } from "@/lib/stavy";
+import { vysledok } from "@/lib/chyby";
 
 export function AkcieFaktury({
   id,
@@ -44,12 +45,12 @@ export function AkcieFaktury({
   const [sposob, setSposob] = useState("PREVOD");
   const [dovodStorna, setDovodStorna] = useState("");
 
-  function spusti(akcia: () => Promise<void>, sprava?: string) {
+  function spusti(akcia: () => Promise<unknown>, sprava?: string) {
     setChyba(null);
     setHotovo(null);
     start(async () => {
       try {
-        await akcia();
+        await vysledok(akcia());
         setPanel("ziadny");
         if (sprava) setHotovo(sprava);
       } catch (e) {

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { schvalDoklad, zamietniDoklad, zmazDoklad, preskenuj } from "../akcie";
 import { Tlacidlo, TextovePole, Chyba } from "@/components/ui";
+import { vysledok } from "@/lib/chyby";
 
 export function AkcieDokladu({
   id,
@@ -22,11 +23,11 @@ export function AkcieDokladu({
   const [dovod, setDovod] = useState("");
   const [chyba, setChyba] = useState<string | null>(null);
 
-  function spusti(akcia: () => Promise<void>) {
+  function spusti(akcia: () => Promise<unknown>) {
     setChyba(null);
     start(async () => {
       try {
-        await akcia();
+        await vysledok(akcia());
       } catch (e) {
         if (e && typeof e === "object" && "digest" in e && String(e.digest).startsWith("NEXT_")) throw e;
         setChyba(e instanceof Error ? e.message : "Akcia zlyhala.");

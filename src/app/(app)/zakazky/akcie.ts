@@ -8,16 +8,17 @@ import { zakazky } from "@/db/schema";
 import { vyzadujPrihlasenie } from "@/lib/auth";
 import { centsToDb, toCents } from "@/lib/money";
 import { zInputDatumu } from "@/lib/stavy";
+import { ChybaVstupu, obal } from "@/lib/chyby";
 
-export async function ulozZakazku(formData: FormData) {
+async function ulozZakazkuTelo(formData: FormData) {
   await vyzadujPrihlasenie();
 
   const id = String(formData.get("id") ?? "");
   const kod = String(formData.get("kod") ?? "").trim().toUpperCase();
   const nazov = String(formData.get("nazov") ?? "").trim();
 
-  if (!kod) throw new Error("Zadaj kód zákazky, napr. 2026-HC-01.");
-  if (!nazov) throw new Error("Zadaj názov zákazky.");
+  if (!kod) throw new ChybaVstupu("Zadaj kód zákazky, napr. 2026-HC-01.");
+  if (!nazov) throw new ChybaVstupu("Zadaj názov zákazky.");
 
   const rozpocetVstup = String(formData.get("rozpocet") ?? "").trim();
 
@@ -47,7 +48,7 @@ export async function ulozZakazku(formData: FormData) {
   } catch (e) {
     if (e && typeof e === "object" && "digest" in e && String(e.digest).startsWith("NEXT_")) throw e;
     if (e instanceof Error && e.message.includes("zakazky_kod_unique")) {
-      throw new Error(`Zákazka s kódom ${kod} už existuje.`);
+      throw new ChybaVstupu(`Zákazka s kódom ${kod} už existuje.`);
     }
     throw e;
   }
@@ -56,4 +57,10 @@ export async function ulozZakazku(formData: FormData) {
 function str(v: FormDataEntryValue | null): string | null {
   const s = v === null ? "" : String(v).trim();
   return s.length ? s : null;
+}
+
+/* Chyby vstupu sa vracajú, nevyhadzujú – pozri src/lib/chyby.ts. */
+
+export async function ulozZakazku(...argumenty: Parameters<typeof ulozZakazkuTelo>) {
+  return obal(() => ulozZakazkuTelo(...argumenty));
 }

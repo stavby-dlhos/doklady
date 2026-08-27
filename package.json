@@ -20,6 +20,7 @@
     "typecheck": "tsc --noEmit",
     "test:vypocty": "tsx scripts/test-vypocty.ts",
     "test:e2e": "tsx scripts/test-e2e.ts",
+    "test:chyby": "tsx scripts/test-chyby.ts",
     "test:prvystart": "tsx scripts/test-prvystart.ts"
   },
   "dependencies": {

@@ -6,13 +6,14 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { partneri } from "@/db/schema";
 import { vyzadujPrihlasenie } from "@/lib/auth";
+import { ChybaVstupu, obal } from "@/lib/chyby";
 
-export async function ulozPartnera(formData: FormData) {
+async function ulozPartneraTelo(formData: FormData) {
   await vyzadujPrihlasenie();
 
   const id = String(formData.get("id") ?? "");
   const nazov = String(formData.get("nazov") ?? "").trim();
-  if (!nazov) throw new Error("Zadaj názov partnera.");
+  if (!nazov) throw new ChybaVstupu("Zadaj názov partnera.");
 
   const ico = String(formData.get("ico") ?? "").replace(/\D/g, "");
 
@@ -45,7 +46,7 @@ export async function ulozPartnera(formData: FormData) {
   redirect("/partneri");
 }
 
-export async function archivujPartnera(id: string, archivovat: boolean) {
+async function archivujPartneraTelo(id: string, archivovat: boolean) {
   await vyzadujPrihlasenie();
   await db.update(partneri).set({ archivovany: archivovat }).where(eq(partneri.id, id));
   revalidatePath("/partneri");
@@ -55,7 +56,7 @@ export async function archivujPartnera(id: string, archivovat: boolean) {
  * Doplnenie údajov firmy podľa IČO z Registra právnických osôb Štatistického
  * úradu SR. Ak register neodpovedá, formulár sa jednoducho vyplní ručne.
  */
-export async function najdiPodlaIco(ico: string): Promise<{
+async function najdiPodlaIcoTelo(ico: string): Promise<{
   ok: boolean;
   chyba?: string;
   data?: { nazov: string; ulica: string; mesto: string; psc: string; dic?: string };
@@ -112,4 +113,18 @@ export async function najdiPodlaIco(ico: string): Promise<{
 function str(v: FormDataEntryValue | null): string | null {
   const s = v === null ? "" : String(v).trim();
   return s.length ? s : null;
+}
+
+/* Chyby vstupu sa vracajú, nevyhadzujú – pozri src/lib/chyby.ts. */
+
+export async function ulozPartnera(...argumenty: Parameters<typeof ulozPartneraTelo>) {
+  return obal(() => ulozPartneraTelo(...argumenty));
+}
+
+export async function archivujPartnera(...argumenty: Parameters<typeof archivujPartneraTelo>) {
+  return obal(() => archivujPartneraTelo(...argumenty));
+}
+
+export async function najdiPodlaIco(...argumenty: Parameters<typeof najdiPodlaIcoTelo>) {
+  return obal(() => najdiPodlaIcoTelo(...argumenty));
 }

@@ -9,6 +9,7 @@ import { parsujVypis } from "@/lib/vypis";
 import { sparujPohyby, sparujRucne } from "@/lib/parovanie";
 import { centsToDb } from "@/lib/money";
 import { createId } from "@/lib/id";
+import { ChybaVstupu, obal } from "@/lib/chyby";
 
 export interface VysledokImportu {
   ok: boolean;
@@ -22,7 +23,7 @@ export interface VysledokImportu {
   detaily?: string[];
 }
 
-export async function importujVypis(formData: FormData): Promise<VysledokImportu> {
+async function importujVypisTelo(formData: FormData): Promise<VysledokImportu> {
   await vyzadujPrihlasenie();
 
   const subor = formData.get("subor");
@@ -115,7 +116,7 @@ export async function importujVypis(formData: FormData): Promise<VysledokImportu
   };
 }
 
-export async function sparujZnova() {
+async function sparujZnovaTelo() {
   await vyzadujPrihlasenie();
   const v = await sparujPohyby();
   revalidatePath("/banka");
@@ -124,27 +125,27 @@ export async function sparujZnova() {
   return v;
 }
 
-export async function priradPohyb(pohybId: string, fakturaId: string) {
+async function priradPohybTelo(pohybId: string, fakturaId: string) {
   await vyzadujPrihlasenie();
   await sparujRucne(pohybId, fakturaId);
   revalidatePath("/banka");
   revalidatePath("/faktury");
 }
 
-export async function oznacAkoVyriesene(pohybId: string) {
+async function oznacAkoVyrieseneTelo(pohybId: string) {
   await vyzadujPrihlasenie();
   await db.update(bankPohyby).set({ sparovane: true }).where(eq(bankPohyby.id, pohybId));
   revalidatePath("/banka");
 }
 
-export async function pridajUcet(formData: FormData) {
+async function pridajUcetTelo(formData: FormData) {
   await vyzadujPrihlasenie();
 
   const iban = String(formData.get("iban") ?? "").replace(/\s/g, "").toUpperCase();
   const nazov = String(formData.get("nazov") ?? "").trim();
 
-  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(iban)) throw new Error("Zadaj platný IBAN.");
-  if (!nazov) throw new Error("Zadaj názov účtu.");
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(iban)) throw new ChybaVstupu("Zadaj platný IBAN.");
+  if (!nazov) throw new ChybaVstupu("Zadaj názov účtu.");
 
   const existujuce = await db.select().from(bankUcty);
 
@@ -173,4 +174,26 @@ async function precitajText(subor: File): Promise<string> {
     }
   }
   return utf8;
+}
+
+/* Chyby vstupu sa vracajú, nevyhadzujú – pozri src/lib/chyby.ts. */
+
+export async function importujVypis(...argumenty: Parameters<typeof importujVypisTelo>) {
+  return obal(() => importujVypisTelo(...argumenty));
+}
+
+export async function sparujZnova(...argumenty: Parameters<typeof sparujZnovaTelo>) {
+  return obal(() => sparujZnovaTelo(...argumenty));
+}
+
+export async function priradPohyb(...argumenty: Parameters<typeof priradPohybTelo>) {
+  return obal(() => priradPohybTelo(...argumenty));
+}
+
+export async function oznacAkoVyriesene(...argumenty: Parameters<typeof oznacAkoVyrieseneTelo>) {
+  return obal(() => oznacAkoVyrieseneTelo(...argumenty));
+}
+
+export async function pridajUcet(...argumenty: Parameters<typeof pridajUcetTelo>) {
+  return obal(() => pridajUcetTelo(...argumenty));
 }

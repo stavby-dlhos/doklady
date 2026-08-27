@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { importujVypis, sparujZnova, priradPohyb, oznacAkoVyriesene, pridajUcet, type VysledokImportu } from "./akcie";
 import { Karta, Tlacidlo, Vstup, Vyber, Pole, Chyba, Uspech, Info } from "@/components/ui";
+import { vysledok as rozbal } from "@/lib/chyby";
 
 export function PanelImportu({ ucty }: { ucty: { id: string; nazov: string; iban: string }[] }) {
   const [bezi, start] = useTransition();
@@ -21,9 +22,22 @@ export function PanelImportu({ ucty }: { ucty: { id: string; nazov: string; iban
     fd.set("ucetId", ucetId);
     setVysledok(null);
     start(async () => {
-      const v = await importujVypis(fd);
-      setVysledok(v);
-      if (v.ok && suborRef.current) suborRef.current.value = "";
+      try {
+        const v = await rozbal(importujVypis(fd));
+        setVysledok(v);
+        if (v.ok && suborRef.current) suborRef.current.value = "";
+      } catch (e) {
+        setVysledok({
+          ok: false,
+          chyba: e instanceof Error ? e.message : "Import zlyhal.",
+          nacitanych: 0,
+          novych: 0,
+          duplicit: 0,
+          sparovanychFaktur: 0,
+          sparovanychDokladov: 0,
+          detaily: [],
+        });
+      }
     });
   }
 
@@ -95,7 +109,7 @@ export function PanelImportu({ ucty }: { ucty: { id: string; nazov: string; iban
           action={async (fd) => {
             setChybaUctu(null);
             try {
-              await pridajUcet(fd);
+              await rozbal(pridajUcet(fd));
               setPridavamUcet(false);
             } catch (e) {
               setChybaUctu(e instanceof Error ? e.message : "Účet sa nepodarilo uložiť.");
@@ -135,7 +149,7 @@ export function PanelImportu({ ucty }: { ucty: { id: string; nazov: string; iban
             disabled={bezi}
             onClick={() =>
               start(async () => {
-                const v = await sparujZnova();
+                const v = await rozbal(sparujZnova());
                 setVysledok({
                   ok: true,
                   nacitanych: 0,
@@ -211,7 +225,7 @@ export function PriradenieUhrady({
               setChyba(null);
               start(async () => {
                 try {
-                  await priradPohyb(pohybId, vybrana);
+                  await rozbal(priradPohyb(pohybId, vybrana));
                 } catch (e) {
                   setChyba(e instanceof Error ? e.message : "Priradenie zlyhalo.");
                 }
@@ -227,7 +241,7 @@ export function PriradenieUhrady({
         <button
           type="button"
           disabled={bezi}
-          onClick={() => start(() => oznacAkoVyriesene(pohybId))}
+          onClick={() => start(async () => { await rozbal(oznacAkoVyriesene(pohybId)); })}
           className="text-xs text-antracit-500 underline-offset-2 hover:underline"
         >
           Nepatrí k dokladu

@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef } from "react";
 import { nahrajASkusOcr, ulozDoklad } from "./akcie";
 import { Karta, Pole, Vstup, Vyber, TextovePole, Tlacidlo, Chyba, Info, Uspech } from "@/components/ui";
+import { vysledok } from "@/lib/chyby";
 import { TYP_DOKLADU, KATEGORIA, naInputDatum } from "@/lib/stavy";
 import { SADZBY_DPH } from "@/lib/dph";
 
@@ -60,7 +61,13 @@ export function FormularDokladu({
     fd.append("subor", f);
 
     startNahravanie(async () => {
-      const v = await nahrajASkusOcr(fd);
+      let v;
+      try {
+        v = await vysledok(nahrajASkusOcr(fd));
+      } catch (e) {
+        setSprava({ typ: "chyba", text: e instanceof Error ? e.message : "Nahranie zlyhalo." });
+        return;
+      }
 
       if (!v.ok) {
         setSprava({ typ: "chyba", text: v.chyba });
@@ -110,7 +117,7 @@ export function FormularDokladu({
     <form
       action={(fd) => startUkladanie(async () => {
         try {
-          await ulozDoklad(fd);
+          await vysledok(ulozDoklad(fd));
         } catch (e) {
           // redirect() vyhadzuje výnimku – tú preskočíme
           if (e && typeof e === "object" && "digest" in e && String(e.digest).startsWith("NEXT_")) throw e;

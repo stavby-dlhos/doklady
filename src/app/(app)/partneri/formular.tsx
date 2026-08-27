@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { ulozPartnera, najdiPodlaIco } from "./akcie";
 import { Karta, Pole, Vstup, Vyber, TextovePole, Tlacidlo, Chyba, Uspech } from "@/components/ui";
+import { vysledok } from "@/lib/chyby";
 
 export interface HodnotyPartnera {
   id?: string;
@@ -35,7 +36,13 @@ export function FormularPartnera({ hodnoty }: { hodnoty?: HodnotyPartnera }) {
     }
     setSprava(null);
     start(async () => {
-      const v = await najdiPodlaIco(p.ico!);
+      let v;
+      try {
+        v = await vysledok(najdiPodlaIco(p.ico!));
+      } catch (e) {
+        setSprava({ typ: "chyba", text: e instanceof Error ? e.message : "Vyhľadanie zlyhalo." });
+        return;
+      }
       if (!v.ok) {
         setSprava({ typ: "chyba", text: v.chyba ?? "Nenašlo sa." });
         return;
@@ -59,7 +66,7 @@ export function FormularPartnera({ hodnoty }: { hodnoty?: HodnotyPartnera }) {
       action={async (fd) => {
         setChybaUlozenia(null);
         try {
-          await ulozPartnera(fd);
+          await vysledok(ulozPartnera(fd));
         } catch (e) {
           if (e && typeof e === "object" && "digest" in e && String(e.digest).startsWith("NEXT_")) throw e;
           setChybaUlozenia(e instanceof Error ? e.message : "Uloženie zlyhalo.");

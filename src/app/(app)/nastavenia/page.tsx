@@ -5,6 +5,7 @@ import { vyzadujPrihlasenie } from "@/lib/auth";
 import { Nadpis, Karta, Pole, Vstup, Vyber, TextovePole, Tlacidlo, Odznak, Info } from "@/components/ui";
 import { formatDatumCas } from "@/lib/stavy";
 import { ulozFirmu, ulozRadu, zmenHeslo, pridajPouzivatela } from "./akcie";
+import { FormularAkcie } from "@/components/formular-akcie";
 import { PrepinacPouzivatela, StavPrepojeni } from "./ui";
 
 export const dynamic = "force-dynamic";
@@ -44,7 +45,7 @@ export default async function Nastavenia() {
             </div>
           )}
 
-          <form action={ulozFirmu} className="space-y-4">
+          <FormularAkcie akcia={ulozFirmu} className="space-y-4" poUlozeni="Údaje firmy uložené.">
             <fieldset disabled={!jeMajitel} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
@@ -139,7 +140,7 @@ export default async function Nastavenia() {
 
               <Tlacidlo type="submit">Uložiť údaje firmy</Tlacidlo>
             </fieldset>
-          </form>
+          </FormularAkcie>
         </Karta>
 
         <Karta>
@@ -150,7 +151,7 @@ export default async function Nastavenia() {
 
           <div className="space-y-4">
             {rady.map((r) => (
-              <form key={r.id} action={ulozRadu} className="rounded-md border border-antracit-200 p-4">
+              <FormularAkcie key={r.id} akcia={ulozRadu} className="rounded-md border border-antracit-200 p-4" poUlozeni="Rada uložená.">
                 <input type="hidden" name="id" value={r.id} />
                 <fieldset disabled={!jeMajitel}>
                   <div className="mb-3 flex items-center justify-between">
@@ -184,14 +185,14 @@ export default async function Nastavenia() {
                     </div>
                   </div>
                 </fieldset>
-              </form>
+              </FormularAkcie>
             ))}
           </div>
         </Karta>
 
         <Karta>
           <h2 className="mb-4 font-semibold text-antracit-900">Zmena hesla</h2>
-          <form action={zmenHeslo} className="grid max-w-md gap-4">
+          <FormularAkcie akcia={zmenHeslo} className="grid max-w-md gap-4" poUlozeni="Heslo zmenené.">
             <Pole popis="Súčasné heslo">
               <Vstup type="password" name="stareHeslo" required autoComplete="current-password" />
             </Pole>
@@ -202,7 +203,7 @@ export default async function Nastavenia() {
               <Vstup type="password" name="noveHesloZnova" required minLength={10} autoComplete="new-password" />
             </Pole>
             <Tlacidlo type="submit">Zmeniť heslo</Tlacidlo>
-          </form>
+          </FormularAkcie>
         </Karta>
 
         {jeMajitel && (
@@ -234,7 +235,7 @@ export default async function Nastavenia() {
 
             <details className="rounded-md border border-antracit-200 bg-antracit-50 p-4">
               <summary className="cursor-pointer font-medium text-antracit-800">Pridať používateľa</summary>
-              <form action={pridajPouzivatela} className="mt-4 grid gap-4 sm:grid-cols-2">
+              <FormularAkcie akcia={pridajPouzivatela} className="mt-4 grid gap-4 sm:grid-cols-2" poUlozeni="Používateľ pridaný.">
                 <Pole popis="Meno">
                   <Vstup name="meno" required />
                 </Pole>
@@ -253,7 +254,7 @@ export default async function Nastavenia() {
                 <div className="sm:col-span-2">
                   <Tlacidlo type="submit">Pridať</Tlacidlo>
                 </div>
-              </form>
+              </FormularAkcie>
             </details>
           </Karta>
         )}

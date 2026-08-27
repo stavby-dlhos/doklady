@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { prepniPouzivatela } from "./akcie";
 import { Karta, Odznak } from "@/components/ui";
+import { vysledok } from "@/lib/chyby";
 
 export function PrepinacPouzivatela({ id, aktivny }: { id: string; aktivny: boolean }) {
   const [bezi, start] = useTransition();
@@ -11,7 +12,7 @@ export function PrepinacPouzivatela({ id, aktivny }: { id: string; aktivny: bool
     <button
       type="button"
       disabled={bezi}
-      onClick={() => start(() => prepniPouzivatela(id, !aktivny))}
+      onClick={() => start(async () => { await vysledok(prepniPouzivatela(id, !aktivny)); })}
       className="text-sm text-antracit-500 underline-offset-2 hover:text-antracit-900 hover:underline disabled:opacity-50"
     >
       {aktivny ? "Deaktivovať" : "Aktivovať"}

@@ -1,6 +1,7 @@
 import { ulozZakazku } from "./akcie";
 import { Karta, Pole, Vstup, Vyber, TextovePole, Tlacidlo } from "@/components/ui";
 import { STAV_ZAKAZKY, naInputDatum } from "@/lib/stavy";
+import { FormularAkcie } from "@/components/formular-akcie";
 
 export interface HodnotyZakazky {
   id?: string;
@@ -19,7 +20,7 @@ export function FormularZakazky({ hodnoty }: { hodnoty?: HodnotyZakazky }) {
   const rok = new Date().getFullYear();
 
   return (
-    <form action={ulozZakazku} className="space-y-5">
+    <FormularAkcie akcia={ulozZakazku} className="space-y-5">
       {hodnoty?.id && <input type="hidden" name="id" value={hodnoty.id} />}
 
       <Karta>
@@ -71,6 +72,6 @@ export function FormularZakazky({ hodnoty }: { hodnoty?: HodnotyZakazky }) {
       </Karta>
 
       <Tlacidlo type="submit">{hodnoty?.id ? "Uložiť zmeny" : "Založiť zákazku"}</Tlacidlo>
-    </form>
+    </FormularAkcie>
   );
 }
