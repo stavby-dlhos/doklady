@@ -47,6 +47,8 @@ export function FormularDokladu({
   const [ocrData, setOcrData] = useState<unknown>(null);
   const [ocrIstota, setOcrIstota] = useState<number | null>(null);
   const [sprava, setSprava] = useState<{ typ: "chyba" | "info" | "uspech"; text: string } | null>(null);
+  // Zobrazí sa až keď systém nájde rovnaký doklad – dovtedy by len mátalo.
+  const [pytaSaNaDvojnika, setPytaSaNaDvojnika] = useState(false);
   const [nahrava, startNahravanie] = useTransition();
   const [uklada, startUkladanie] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -121,7 +123,9 @@ export function FormularDokladu({
         } catch (e) {
           // redirect() vyhadzuje výnimku – tú preskočíme
           if (e && typeof e === "object" && "digest" in e && String(e.digest).startsWith("NEXT_")) throw e;
-          setSprava({ typ: "chyba", text: e instanceof Error ? e.message : "Uloženie zlyhalo." });
+          const text = e instanceof Error ? e.message : "Uloženie zlyhalo.";
+          if (text.includes("už v systéme je")) setPytaSaNaDvojnika(true);
+          setSprava({ typ: "chyba", text });
         }
       })}
       className="space-y-5"
@@ -333,6 +337,24 @@ export function FormularDokladu({
           </Pole>
         </div>
       </Karta>
+
+      {pytaSaNaDvojnika && (
+        <Karta>
+          <label className="flex items-start gap-2.5">
+            <input
+              type="checkbox"
+              name="potvrdenyDvojnik"
+              className="mt-0.5 h-4 w-4 rounded border-antracit-300 text-antracit-900 focus:ring-antracit-500"
+            />
+            <span className="text-sm">
+              <span className="font-medium text-antracit-800">Je to naozaj iný doklad</span>
+              <span className="block text-xs text-antracit-500">
+                Zaškrtni len ak si istý, že nejde o ten istý nákup zadaný druhýkrát.
+              </span>
+            </span>
+          </label>
+        </Karta>
+      )}
 
       <div className="flex gap-3">
         <Tlacidlo type="submit" disabled={uklada || nahrava}>

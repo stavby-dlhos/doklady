@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Doklady — Stavby-Dlhoš",
   description: "Evidencia dokladov, fakturácia a náklady po zákazkách.",
   robots: { index: false, follow: false },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Doklady", statusBarStyle: "black-translucent" },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {

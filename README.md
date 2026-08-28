@@ -194,6 +194,7 @@ npm run dev               # http://localhost:3000
 npm run test:vypocty      # DPH, zaokrúhľovanie, parsovanie výpisov
 npm run test:e2e          # celý tok v prehliadači (appka musí bežať)
 npm run test:chyby        # chyby vo formulároch sa zobrazujú používateľovi
+npm run test:duplicita    # ochrana pred dvakrát zadaným dokladom, manifest pre telefón
 npm run test:prvystart    # úvodná obrazovka na prázdnej databáze
 npm run typecheck
 npm run uloha             # ručné spustenie údržby

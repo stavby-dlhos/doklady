@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { and, eq, ne, or } from "drizzle-orm";
 import { db } from "@/db";
 import { prijateDoklady, partneri, auditLog } from "@/db/schema";
 import { vyzadujPrihlasenie, vyzadujMajitela } from "@/lib/auth";
@@ -10,7 +10,7 @@ import { ulozSubor, zmazSubor } from "@/lib/storage";
 import { vytazDoklad } from "@/lib/ocr";
 import { centsToDb, toCents } from "@/lib/money";
 import { rozpocitajZCelkovej, normalizujSadzbu } from "@/lib/dph";
-import { zInputDatumu } from "@/lib/stavy";
+import { zInputDatumu, formatDatum } from "@/lib/stavy";
 import { ChybaVstupu, obal } from "@/lib/chyby";
 
 const MAX_SUBOR = 20 * 1024 * 1024;
@@ -22,6 +22,44 @@ async function zapisAudit(
   detail?: string,
 ): Promise<void> {
   await db.insert(auditLog).values({ entita: "prijaty_doklad", entitaId, akcia, pouzivatelId, detail });
+}
+
+/**
+ * Ten istý bloček dvakrát.
+ *
+ * Doklad sa do systému dostane tromi cestami — odfotením, prepošlením mailom
+ * a ručne — takže sa ľahko stane, že jeden nákup pribudne dvakrát. Zaplatiť
+ * faktúru druhýkrát je drahšie než jeden klik navyše, preto sa systém spýta.
+ * Rozhoduje dodávateľ, suma a číslo dokladu (alebo variabilný symbol).
+ */
+async function najdiDvojnika(
+  dodavatelId: string | null,
+  cisloDokladu: string | null,
+  variabilnySymbol: string | null,
+  sumaCelkom: string,
+  okremId: string | null,
+) {
+  const znacka = cisloDokladu ?? variabilnySymbol;
+  if (!dodavatelId || !znacka) return null;
+
+  const podmienky = [
+    eq(prijateDoklady.dodavatelId, dodavatelId),
+    eq(prijateDoklady.sumaCelkom, sumaCelkom),
+    or(eq(prijateDoklady.cisloDokladu, znacka), eq(prijateDoklady.variabilnySymbol, znacka)),
+  ];
+  if (okremId) podmienky.push(ne(prijateDoklady.id, okremId));
+
+  const [dvojnik] = await db
+    .select({
+      id: prijateDoklady.id,
+      cislo: prijateDoklady.cisloDokladu,
+      datum: prijateDoklady.datumVystavenia,
+    })
+    .from(prijateDoklady)
+    .where(and(...podmienky))
+    .limit(1);
+
+  return dvojnik ?? null;
 }
 
 /** Nahranie súboru + OCR. Vracia predvyplnené hodnoty pre formulár. */
@@ -110,6 +148,25 @@ async function ulozDokladTelo(formData: FormData) {
     poznamka: str(formData.get("poznamka")),
     updatedAt: new Date(),
   };
+
+  // Ak používateľ potvrdil, že ide naozaj o iný doklad, kontrolu preskočíme.
+  if (formData.get("potvrdenyDvojnik") !== "on") {
+    const dvojnik = await najdiDvojnika(
+      hodnoty.dodavatelId,
+      hodnoty.cisloDokladu,
+      hodnoty.variabilnySymbol,
+      hodnoty.sumaCelkom,
+      id || null,
+    );
+    if (dvojnik) {
+      const kedy = formatDatum(dvojnik.datum);
+      const cislo = dvojnik.cislo ? `č. ${dvojnik.cislo} ` : "";
+      throw new ChybaVstupu(
+        `Rovnaký doklad ${cislo}od tohto dodávateľa a v rovnakej sume už v systéme je (${kedy}). ` +
+          "Ak je to naozaj iný doklad, zaškrtni potvrdenie nižšie a ulož znova.",
+      );
+    }
+  }
 
   if (id) {
     await db.update(prijateDoklady).set(hodnoty).where(eq(prijateDoklady.id, id));

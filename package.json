@@ -21,6 +21,7 @@
     "test:vypocty": "tsx scripts/test-vypocty.ts",
     "test:e2e": "tsx scripts/test-e2e.ts",
     "test:chyby": "tsx scripts/test-chyby.ts",
+    "test:duplicita": "tsx scripts/test-duplicita.ts",
     "test:prvystart": "tsx scripts/test-prvystart.ts"
   },
   "dependencies": {
